@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Guia Interativo - Parques de MG (Protótipo)</title>
+  <style>
+    /* MOBILE-FIRST SIMPLE THEME */
+    :root{
+      --blue:#0b6b9a; --soft:#e9f6fb; --accent:#2fa365; --glass:rgba(255,255,255,0.85);
+      --card-radius:14px; --gap:12px; --maxw:980px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#f6fbff 0%,#ffffff 60%);color:#1b2630}
+    .container{max-width:var(--maxw);margin:0 auto;padding:16px}
+
+    header{display:flex;align-items:center;gap:12px;padding:10px 0}
+    .logo{width:56px;height:56px;border-radius:12px;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:6px 0 0 0;font-size:13px;color:#2f3d45}
+
+    /* Search + map */
+    .search-row{display:flex;gap:8px;margin:12px 0}
+    .search-row input{flex:1;padding:10px;border-radius:10px;border:1px solid #d6e6ef;background:#fff}
+    .map-card{border-radius:var(--card-radius);overflow:hidden;box-shadow:0 6px 20px rgba(13,38,59,0.08);margin-bottom:12px}
+    .map-frame{width:100%;height:220px;border:0}
+
+    /* parks list */
+    .parks{display:grid;grid-template-columns:1fr;gap:10px}
+    .park{background:var(--glass);padding:12px;border-radius:12px;display:flex;gap:10px;align-items:center}
+    .park img{width:84px;height:64px;object-fit:cover;border-radius:8px}
+    .park .meta{flex:1}
+    .park h3{margin:0;font-size:15px}
+    .park p{margin:4px 0 0 0;font-size:13px;color:#3b494f}
+    .btn{background:var(--blue);color:#fff;padding:8px 10px;border-radius:10px;border:0;font-weight:600;cursor:pointer}
+    .btn-ghost{background:transparent;border:1px solid var(--blue);color:var(--blue)}
+
+    /* park detail modal (simple) */
+    .modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;padding:18px}
+    .modal.open{display:flex}
+    .sheet{width:100%;max-width:820px;border-radius:14px 14px 8px 8px;background:#fff;padding:14px;box-shadow:0 20px 40px rgba(0,0,0,0.12)}
+    .sheet .head{display:flex;align-items:center;gap:12px}
+    .sheet .hero{width:100%;height:220px;object-fit:cover;border-radius:10px;margin:10px 0}
+    .flex{display:flex;gap:10px}
+    .col{flex:1}
+
+    /* gallery */
+    .gallery{display:flex;gap:8px;overflow:auto;padding-bottom:6px}
+    .gallery img{height:86px;border-radius:8px;object-fit:cover}
+
+    /* checkin card */
+    .checkin{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .stamp{display:flex;flex-direction:column;align-items:center;padding:8px;border-radius:10px;background:linear-gradient(180deg,#fff 0,#f2f9f6 100%);width:110px}
+    .stamp small{font-size:11px;color:#436058}
+
+    footer{margin:18px 0 50px 0;text-align:center;color:#567}
+
+    /* desktop */
+    @media(min-width:880px){
+      .search-row input{padding:14px}
+      .parks{grid-template-columns:repeat(2,1fr)}
+      .map-frame{height:360px}
+      .modal{align-items:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">MG</div>
+      <div>
+        <h1>Guia Interativo — Parques de Minas</h1>
+        <p class="lead">Informações oficiais + recursos para criar posts, colecionar carimbos e compartilhar. Protótipo.</p>
+      </div>
+    </header>
+
+    <div class="search-row">
+      <input id="q" placeholder="Buscar parque ou cidade..." />
+      <button class="btn" id="btnSearch">Buscar</button>
+    </div>
+
+    <div class="map-card">
+      <!-- Example simple Google Maps embed. Replace the src with a real place or use the Google Maps Embed API if you have a key. -->
+      <iframe class="map-frame" id="mapFrame"
+        src="https://www.google.com/maps/d/embed?mid=1" allowfullscreen></iframe>
+    </div>
+
+    <section>
+      <h2 style="font-size:16px;margin:8px 0">Parques</h2>
+      <div class="parks" id="parksList"></div>
+    </section>
+
+    <footer>
+      Protótipo — funciona offline no navegador; dados de exemplo. Sugestões: adicionar PWA e integração com Google Photos / Drive.
+    </footer>
+  </div>
+
+  <!-- modal sheet for park detail -->
+  <div class="modal" id="modal">
+    <div class="sheet" role="dialog" aria-modal="true">
+      <div class="head">
+        <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;background:#eee"><img id="detailImg" style="width:100%;height:100%;object-fit:cover"/></div>
+        <div style="flex:1">
+          <h3 id="detailTitle">Título do Parque</h3>
+          <p id="detailSubtitle" style="margin:4px 0 0 0;color:#445">Cidade • Dificuldade • Tempo</p>
+        </div>
+        <div>
+          <button class="btn-ghost" id="closeModal">Fechar</button>
+        </div>
+      </div>
+
+      <img id="detailHero" class="hero"/>
+
+      <div class="flex">
+        <div class="col">
+          <h4>Informações</h4>
+          <p id="detailInfo" style="margin-top:6px">Descrição curta do parque com trilhas e cuidados.</p>
+
+          <h4 style="margin-top:10px">Galeria</h4>
+          <div class="gallery" id="gallery"></div>
+        </div>
+        <div style="width:260px">
+          <h4>Interaja</h4>
+          <div class="checkin">
+            <div>
+              <p style="margin:0 0 6px 0">Faça check-in e gere um carimbo para compartilhar</p>
+              <input type="file" id="photoInput" accept="image/*" />
+              <div style="margin-top:8px"><button class="btn" id="btnGenerate">Gerar carimbo</button></div>
+            </div>
+            <div class="stamp" id="stampPreview">
+              <div style="width:72px;height:72px;border-radius:8px;background:#eef;padding:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--blue)" id="stampImg">MG</div>
+              <small id="stampLabel">Sem check-in</small>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <h4>Seus Carimbos</h4>
+            <div id="myStamps"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+        <button class="btn-ghost" id="btnClose2">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas" style="display:none"></canvas>
+
+  <script>
+    // SAMPLE DATA: small list of parks (substitua/expanda conforme desejar)
+    const parks = [
+      {id:'ibitipoca',name:'Parque de Ibitipoca',city:'Ibitipoca, MG',difficulty:'Médio',time:'4-6h',img:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=xyz',hero:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=xyz',about:'Área de preservação com trilhas, mirantes e cachoeiras. Traga água, calçado adequado e respeite as regras do parque.',gallery:['https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=800','https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800']},
+      {id:'cipó',name:'Parque Nacional da Serra do Cipó',city:'Serra do Cipó, MG',difficulty:'Fácil a Difícil',time:'2-8h',img:'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1200',hero:'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600',about:'Cachoeiras, fauna e flora riquíssimas. Perfeito para escalada e trilhas longas.',gallery:['https://images.unsplash.com/photo-1499394153797-499f5d8f2b51?q=80&w=800']}
+    ];
+
+    const parksList = document.getElementById('parksList');
+    const modal = document.getElementById('modal');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailSubtitle = document.getElementById('detailSubtitle');
+    const detailInfo = document.getElementById('detailInfo');
+    const detailImg = document.getElementById('detailImg');
+    const detailHero = document.getElementById('detailHero');
+    const gallery = document.getElementById('gallery');
+    const stampPreview = document.getElementById('stampImg');
+    const stampLabel = document.getElementById('stampLabel');
+    const myStamps = document.getElementById('myStamps');
+
+    function renderList(items){
+      parksList.innerHTML='';
+      items.forEach(p=>{
+        const div = document.createElement('div'); div.className='park';
+        div.innerHTML = `<img src="${p.img}"><div class="meta"><h3>${p.name}</h3><p>${p.city} • ${p.time} • ${p.difficulty}</p></div><div><button class="btn" data-id="${p.id}">Ver</button></div>`;
+        parksList.appendChild(div);
+      });
+      document.querySelectorAll('.park .btn').forEach(b=>b.addEventListener('click',e=>openPark(e.target.dataset.id)));
+    }
+
+    function openPark(id){
+      const p = parks.find(x=>x.id===id); if(!p) return;
+      detailTitle.textContent=p.name; detailSubtitle.textContent=p.city+' • '+p.difficulty+' • '+p.time;
+      detailInfo.textContent=p.about; detailImg.src=p.img; detailHero.src=p.hero;
+      gallery.innerHTML=''; p.gallery.forEach(u=>{const im=document.createElement('img');im.src=u;gallery.appendChild(im)});
+      // attach current park id for check-in
+      modal.dataset.park = id;
+      modal.classList.add('open');
+      refreshMyStamps();
+    }
+
+    document.getElementById('closeModal').addEventListener('click',closeModal);
+    document.getElementById('btnClose2').addEventListener('click',closeModal);
+    function closeModal(){ modal.classList.remove('open'); }
+
+    // search
+    document.getElementById('btnSearch').addEventListener('click',()=>{const q=document.getElementById('q').value.toLowerCase(); renderList(parks.filter(p=>p.name.toLowerCase().includes(q)||p.city.toLowerCase().includes(q)));});
+
+    // Check-in & stamp generation (client-side only)
+    const photoInput = document.getElementById('photoInput');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    document.getElementById('btnGenerate').addEventListener('click',async ()=>{
+      const parkId = modal.dataset.park; if(!parkId) return alert('Abra um parque antes.');
+      const p = parks.find(x=>x.id===parkId);
+      // get image: if user provided a file, use it; otherwise use hero
+      let imgFile = photoInput.files[0];
+      const img = new Image();
+      img.crossOrigin='anonymous';
+      img.src = imgFile ? URL.createObjectURL(imgFile) : p.hero;
+      img.onload = ()=>{
+        // canvas size (square-ish for insta) 1200x900
+        canvas.width=1200; canvas.height=900; ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        // draw background photo scaled cover
+        const ratio = Math.max(canvas.width/img.width, canvas.height/img.height);
+        const w = img.width*ratio; const h = img.height*ratio; const x = (canvas.width-w)/2; const y = (canvas.height-h)/2;
+        ctx.drawImage(img,x,y,w,h);
+        // overlay translucent banner
+        ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.fillRect(0,canvas.height-160,canvas.width,160);
+        // park name
+        ctx.fillStyle='#fff'; ctx.font='bold 44px Roboto,Arial'; ctx.textAlign='left'; ctx.fillText(p.name,36,canvas.height-90);
+        // small meta
+        ctx.font='20px Roboto,Arial'; ctx.fillText(p.city+' • '+p.time,36,canvas.height-50);
+        // stamp / badge circle
+        const cx = canvas.width-120, cy=canvas.height-80, r=64;
+        ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill(); ctx.closePath();
+        ctx.fillStyle= '#0b6b9a'; ctx.font='700 26px Roboto,Arial'; ctx.textAlign='center'; ctx.fillText('Explorador',cx,cy-6); ctx.font='600 18px Roboto,Arial'; ctx.fillText(p.name.split(' ')[1] || p.name.split(' ')[0],cx,cy+22);
+
+        // create blob and offer download/share
+        canvas.toBlob(blob=>{
+          const url = URL.createObjectURL(blob);
+          // save stamp metadata to localStorage
+          const stamps = JSON.parse(localStorage.getItem('stamps'||'[]'))||[];
+          const entry = {id:Date.now(),parkId:parkId,parkName:p.name,image:url,date:new Date().toISOString()};
+          stamps.push(entry); localStorage.setItem('stamps',JSON.stringify(stamps));
+          refreshMyStamps();
+          // open in new tab
+          const a = document.createElement('a'); a.href=url; a.download = (p.id+'-stamp.png'); a.click();
+          // navigator.share if available
+          if(navigator.share){
+            fetch(url).then(r=>r.blob()).then(b=>{
+              const file = new File([b], p.id+'-stamp.png', {type:'image/png'});
+              navigator.share({title:'Check-in: '+p.name,text:'Fiz check-in em '+p.name,files:[file]}).catch(()=>{});
+            });
+          }
+        });
+      };
+    });
+
+    function refreshMyStamps(){
+      const stamps = JSON.parse(localStorage.getItem('stamps')||'[]');
+      myStamps.innerHTML='';
+      stamps.slice().reverse().forEach(s=>{
+        const d = document.createElement('div'); d.style.display='flex'; d.style.alignItems='center'; d.style.gap='8px'; d.style.marginBottom='8px';
+        const im = document.createElement('img'); im.src=s.image; im.style.width='72px'; im.style.height='54px'; im.style.objectFit='cover'; im.style.borderRadius='8px';
+        const meta = document.createElement('div'); meta.style.fontSize='13px'; meta.innerHTML = `<strong>${s.parkName}</strong><br><small>${new Date(s.date).toLocaleString()}</small>`;
+        const btn = document.createElement('button'); btn.className='btn-ghost'; btn.textContent='Remover'; btn.addEventListener('click',()=>{removeStamp(s.id)});
+        d.appendChild(im); d.appendChild(meta); d.appendChild(btn); myStamps.appendChild(d);
+      });
+    }
+    function removeStamp(id){ const stamps = JSON.parse(localStorage.getItem('stamps')||'[]'); localStorage.setItem('stamps',JSON.stringify(stamps.filter(s=>s.id!==id))); refreshMyStamps(); }
+
+    // initial render
+    renderList(parks);
+    refreshMyStamps();
+
+    // small guidance for testing
+    console.log('Protótipo carregado. Abra um parque e clique em "Gerar carimbo". O arquivo será baixado e salvo localmente (localStorage).');
+  </script>
+</body>
+</html>
