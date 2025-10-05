@@ -429,13 +429,14 @@
 
             <div class="park-details-grid">
                 <div>
-                    <h4>Sobre o Parque</h4>
-                    <p class="text-muted" id="parkAbout"></p>
-                    
                     <h4 style="margin-top: 20px;">Galeria de Imagens</h4>
                     <div id="parkGallery" class="gallery-strip"></div>
 
-                    <h4 style="margin-top: 20px;">Trilhas e Rotas</h4>
+                    <h4>Sobre o Parque</h4>
+                    <p class="text-muted" id="parkAbout"></p>              
+
+                    <h4 style="margin-top: 20px;">Trilhas | Atrações</h4>
+                    <p id="parkTrailsInfo" style="white-space: pre-wrap; margin-bottom: 10px;"></p>
                     <p class="text-muted" id="parkMapMsg">Mapa detalhado do parque. Ideal para ver trilhas e pontos de interesse.</p>
                     <div class="map-embed-box">
                         <iframe id="parkDetailMap" src="about:blank" title="Mapa do Parque"></iframe>
@@ -471,15 +472,96 @@
 
     <canvas id="canvas" style="display:none"></canvas>
 
-    <script>
-        // Dados do Projeto - Simulação de JSON (Adaptado para o Novo Design)
-        const RAW_PARKS_DATA = [
-            { id: 'ibitipoca', name: 'Parque Estadual do Ibitipoca', city: 'Lima Duarte', difficulty: 'Difícil', time: '4-6h', tags: ['Difícil', 'Cachoeira', 'Mirante'], hero: 'https://upload.wikimedia.org/wikipedia/commons/e/eb/Janela_do_C%C3%A9u_-_Parque_Estadual_do_Ibitipoca.jpg', about: 'Um dos destinos de ecoturismo mais procurados de Minas, famoso por suas formações rochosas, a "Janela do Céu" e trilhas desafiadoras.', gallery: ['https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800','https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=800'], mapEmbedUrl: 'https://www.google.com/maps/d/embed?mid=1WU17wqpnnKkLxRN9ldTy0zGaf_fX_8Q&ehbc=2E312F'},
-            { id: 'cipo', name: 'Parque Nacional da Serra do Cipó', city: 'Serra do Cipó', difficulty: 'Médio', time: '2-8h', tags: ['Médio', 'Cachoeira', 'Vegetação'], hero: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Parque_Nacional_da_Serra_do_Cip%C3%B3.jpg', about: 'Vasta área na Serra do Espinhaço, conhecida por suas imensas cachoeiras (como a Véu da Noiva) e a rica flora do Cerrado e Campos Rupestres.', gallery: ['https://images.unsplash.com/photo-1499394153797-499f5d8f2b51?q=80&w=800','https://images.unsplash.com/photo-1517457813264-500e5728a306?q=80&w=800'], mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7503.49122393856!2d-43.58552395679234!3d-19.349666750000003!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa69d51f28b2489%3A0x6b53a0058b29c9cc!2sSerra%20do%20Cip%C3%B3!5e0!3m2!1spt-BR!2sbr!4v1633333333333!5m2!1spt-BR!2sbr'},
-            { id: 'sumidouro', name: 'Parque Estadual do Sumidouro', city: 'Lagoa Santa', difficulty: 'Fácil', time: '2h', tags: ['Fácil', 'Gruta', 'Arqueologia'], hero: 'https://images.unsplash.com/photo-1549414207-6955c45f4c58?q=80&w=800', about: 'Combina história e natureza, abrigando a Gruta da Lapinha e vestígios arqueológicos de Luzia. Ideal para um passeio leve e cultural.', gallery: ['https://images.unsplash.com/photo-1549414207-6955c45f4c58?q=80&w=800','https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800'], mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14995.81977937446!2d-43.91000925!3d-19.6468762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xa6be9024f2b189%3A0x1b44558e85501865!2sParque%20Estadual%20do%20Sumidouro!5e0!3m2!1spt-BR!2sbr!4v1633333333333!5m2!1spt-BR!2sbr'}
-        ];
-        let allParks = [];
-        let currentFilter = 'all';
+<script>
+    // Dados do Projeto - Simulação de JSON
+    // **********************************************************************************
+    // GUIA RÁPIDO PARA INSERÇÃO DE PARQUES:
+    // 
+    // 1. COMEÇA AQUI: {
+    // 2. id:           'novo_parque', // (string, SEM ACENTOS, SEM ESPAÇOS - Ex: 'rio_doce')
+    // 3. name:         'Nome Completo do Parque',
+    // 4. city:         'Cidade Sede',
+    // 5. difficulty:   'Fácil' | 'Médio' | 'Difícil', // Usado para filtro de cor principal
+    // 6. time:         'Tempo Estimado (Ex: 3-4h)',
+    // 7. tags:         ['Difícil', 'Cachoeira', 'Mirante'], // Tags usadas nos botões de filtro.
+    // 8. hero:         'LINK_DA_FOTO_DE_CAPA_AQUI', // URL da imagem principal (card/modal)
+    // 9. about:        'Descrição curta e atraente para o modal.',
+    // 10. gallery:     ['LINK_FOTO_1', 'LINK_FOTO_2'], // URLs de miniaturas para a Galeria
+    // 11. mapEmbedUrl: 'SUA_URL_DO_MY_MAPS_DE_TRILHAS_AQUI' // URL de incorporação do Google My Maps
+    // 12. TERMINA AQUI: },
+    // 
+    // **********************************************************************************
+
+    const RAW_PARKS_DATA = [
+        // --- PARQUE 1: IBITIPOCA (Exemplo de Parque Difícil) ---
+        { 
+            id: 'ibitipoca', 
+            name: 'Parque Estadual do Ibitipoca', 
+            city: 'Lima Duarte e Santa Rita do Ibitipoca', 
+            difficulty: 'Difícil', 
+            time: '4-6h', 
+            tags: ['Difícil', 'Cachoeira', 'Mirante'], 
+            trails_info: `Circuito das Águas: Com 5,2km ida/volta e duração média de 5h, subidas e descidas íngremes. Ao longo da trilha existem mirantes que foram instalados como forma de promover segurança e conforto ao visitante, além de possibilitar a contemplação da paisagem. | Circuito do Pião: Este circuito possui um percurso longo, com aproximadamente 9,5km ida/volta e duração média de 6h, com muitas subidas e descidas íngremes. | Circuito Janela do Céu: Esse circuito tem o limite para receber até 240 visitantes ao dia. É um percurso mais longo, com 16km ida/volta, com subidas e decidas íngremes, que exige preparo físico por conta de sua duração. | Cachoeira dos Macacos: Perfeita para banho em águas | Cachoeira do Encanto Um refúgio natural para relaxar`,
+            hero: 'https://sisema07.github.io/parquesdeminas/Ibitipoca.jpg',
+            about: 'Localizado nos municípios de Lima Duarte e Santa Rita do Ibitipoca, fazendo divisa com Bias Fortes, o Parque Estadual do Ibitipoca é um dos mais famosos destinos de ecoturismo de Minas Gerais. Inserido no bioma Mata Atlântica, apresenta lagos, cachoeiras, grutas e mirantes impressionantes. Entre os atrativos principais estão a Ponte de Pedra, a Janela do Céu, o Pico do Pião e a Gruta dos Três Arcos. A biodiversidade local reúne espécies raras e ameaçadas. A visitação é controlada, com venda de ingressos online ou diretamente na bilheteria, garantindo preservação ambiental e qualidade da experiência. Suas trilhas bem estruturadas fazem do parque um destino ímpar para contato com a natureza, turismo de aventura e contemplação.',  
+            gallery: ['https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=800'], 
+            mapEmbedUrl: 'https://expressinha.com/wp-content/uploads/2019/06/mapa-ibitipoca.jpg'
+        },
+        // --- PARQUE 2: SERRA DO CIPÓ (Exemplo de Parque Médio) ---
+        { 
+            id: 'cipo', 
+            name: 'Parque Nacional da Serra do Cipó', 
+            city: 'Serra do Cipó', 
+            difficulty: 'Médio', 
+            time: '2-8h', 
+            tags: ['Médio', 'Cachoeira', 'Vegetação'], 
+            hero: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Parque_Nacional_da_Serra_do_Cip%C3%B3.jpg', 
+            about: 'Vasta área na Serra do Espinhaço, conhecida por suas imensas cachoeiras (como a Véu da Noiva) e a rica flora do Cerrado e Campos Rupestres.', 
+            gallery: ['https://images.unsplash.com/photo-1499394153797-499f5d8f2b51?q=80&w=800', 'https://images.unsplash.com/photo-1517457813264-500e5728a306?q=80&w=800'], 
+            mapEmbedUrl: 'SUA_URL_MYMAPS_CIPÓ_AQUI'
+        },
+        // --- PARQUE 3: SUMIDOURO (Exemplo de Parque Fácil com Gruta) ---
+        { 
+            id: 'sumidouro', 
+            name: 'Parque Estadual do Sumidouro', 
+            city: 'Lagoa Santa', 
+            difficulty: 'Fácil', 
+            time: '2h', 
+            tags: ['Fácil', 'Gruta', 'Arqueologia'], 
+            hero: 'https://images.unsplash.com/photo-1549414207-6955c45f4c58?q=80&w=800', 
+            about: 'Combina história e natureza, abrigando a Gruta da Lapinha e vestígios arqueológicos de Luzia. Ideal para um passeio leve e cultural.', 
+            gallery: ['https://images.unsplash.com/photo-1549414207-6955c45f4c58?q=80&w=800', 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800'], 
+            mapEmbedUrl: 'SUA_URL_MYMAPS_SUMIDOURO_AQUI'
+        },
+        // --- PARQUE 4: RIO DOCE (Novo Exemplo: Maior remanescente de Mata Atlântica) ---
+        { 
+            id: 'rio_doce', 
+            name: 'Parque Estadual do Rio Doce', 
+            city: 'Marliéria', 
+            difficulty: 'Médio', 
+            time: '3-5h', 
+            tags: ['Médio', 'Lago', 'Mata Atlântica', 'Vida Selvagem'], 
+            hero: 'https://images.unsplash.com/photo-1582260273766-3d2b27a3c3d5?q=80&w=800', 
+            about: 'O maior remanescente de Mata Atlântica de Minas, famoso por seus lagos naturais e pela rica biodiversidade. Ótimo para observação de aves.', 
+            gallery: ['https://images.unsplash.com/photo-1582260273766-3d2b27a3c3d5?q=80&w=800', 'https://images.unsplash.com/photo-1547781708-4179371d34c1?q=80&w=800'], 
+            mapEmbedUrl: 'SUA_URL_MYMAPS_RIO_DOCE_AQUI'
+        },
+        // --- PARQUE 5: MANGABEIRAS (Novo Exemplo: Parque Urbano/Fácil) ---
+        { 
+            id: 'mangabeiras', 
+            name: 'Parque das Mangabeiras', 
+            city: 'Belo Horizonte', 
+            difficulty: 'Fácil', 
+            time: '1-2h', 
+            tags: ['Fácil', 'Urbano', 'Mirante', 'Família'], 
+            hero: 'https://images.unsplash.com/photo-1582260273766-3d2b27a3c3d5?q=80&w=800', 
+            about: 'Localizado aos pés da Serra do Curral, este é um dos maiores e mais importantes parques urbanos do país, oferecendo vistas panorâmicas da cidade.', 
+            gallery: ['https://images.unsplash.com/photo-1547781708-4179371d34c1?q=80&w=800', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=800'], 
+            mapEmbedUrl: 'SUA_URL_MYMAPS_MANGABEIRAS_AQUI'
+        }
+    ];
+    let allParks = [];
+    let currentFilter = 'all';
 
         // Elementos UI
         const parksList = document.getElementById('parksList');
@@ -576,6 +658,7 @@
             document.getElementById('parkMeta').textContent = `${p.city} | ${p.difficulty} | ${p.time}`;
             document.getElementById('parkAbout').textContent = p.about;
             document.getElementById('parkHero').src = p.hero;
+            document.getElementById('parkTrailsInfo').textContent = p.trails_info || 'Nenhuma informação de trilha detalhada disponível.';
             document.getElementById('parkDetailMap').src = p.mapEmbedUrl || 'about:blank';
             document.getElementById('parkMapMsg').textContent = p.mapEmbedUrl ? 'Visualize as rotas e planeje sua trilha.' : 'Nenhuma rota detalhada disponível. Exibindo mapa geral.';
 
