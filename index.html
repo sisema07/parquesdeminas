@@ -134,6 +134,13 @@
             align-items: center;
             font-size: 16px;
         }
+        /* NOVO: Estilos para o Avatar no Header quando tem foto */
+        .profile-avatar.has-image {
+            font-size: 0; /* Esconde o emoji */
+            background-image: var(--avatar-img); /* Variável setada no JS */
+            background-size: cover;
+            background-position: center;
+        }
         .profile-name {font-weight: 700; font-size: 13px;}
 
         /* 5. Seção de Busca e Filtro */
@@ -387,7 +394,7 @@
             </div>
         
         <footer style="margin-top: 50px; text-align: center;" class="text-muted">
-            <p>Trilhas de Minas &copy; Protótipo Serverless | Desenvolvido com foco em performance e ecoturismo.</p>
+            <p>Trilhas de Minas © Protótipo Serverless | Desenvolvido com foco em performance e ecoturismo.</p>
         </footer>
 
     </div>
@@ -405,6 +412,8 @@
                     <p class="text-muted">Seu nome e avatar para o carimbo digital.</p>
                     <input type="text" id="pfName" placeholder="Seu Apelido de Aventureiro" style="margin-bottom: 8px;" />
                     <input type="text" id="pfCity" placeholder="Cidade (Opcional)" />
+                    <input type="file" id="pfPhotoInput" accept="image/*" style="margin-bottom: 8px;" />
+                    <img id="pfPhotoPreview" style="display:none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;" alt="Prévia da foto de perfil" />
                     <div class="input-group" style="margin-top: 10px; flex-wrap: wrap;">
                         <button class="btn btn-primary" onclick="saveProfile()">Salvar Perfil</button>
                         <button class="btn btn-secondary" onclick="pickRandomAvatar()">Avatar Aleatório</button>
@@ -451,8 +460,8 @@
                         <input type="file" id="photoInput" accept="image/*" />
                         <span class="text-muted" id="errorStamp" style="color: #c0392b; display: none;"></span>
                         <div class="input-group" style="margin-bottom: 0;">
-                            <button class="btn btn-primary" id="btnGenerate">Gerar Carimbo (Foto)</button>
-                            <button class="btn btn-secondary" id="btnQuick">Quick (Hero)</button>
+                            <button class="btn btn-primary" id="btnGenerate">Com sua foto no parque</button>
+                            <button class="btn btn-secondary" id="btnQuick">Com imagem do parque</button>
                         </div>
                     </div>
                     
@@ -652,6 +661,7 @@
             const p = allParks.find(x => x.id === id);
             if (!p) return;
             currentPark = p;
+            localStorage.setItem('currentParkId', p.id); // Salva o ID para uso na finalização assíncrona
 
             // Preenche o Modal
             document.getElementById('parkTitle').textContent = p.name;
@@ -683,7 +693,7 @@
 
         // ------------------ PERFIL E LOCALSTORAGE ------------------
 
-        const defaultProfile = { name: 'Aventureiro', city: '', avatar: '👣' };
+        const defaultProfile = { name: 'Aventureiro', city: '', avatar: '👣', avatarImage: null }; // Adiciona a chave para a imagem
 
         function loadProfile() {
             const raw = localStorage.getItem('explorerProfile');
@@ -698,8 +708,21 @@
 
         function applyProfile() {
             const p = loadProfile();
+            const avatarEl = document.getElementById('avatarEl'); // Elemento no Header
+            
             document.getElementById('profileName').textContent = p.name || 'Visitante';
-            document.getElementById('avatarEl').textContent = p.avatar || '👣';
+            avatarEl.textContent = p.avatar || '👣';
+            
+            // Lógica para mostrar a imagem no header
+            if (p.avatarImage) {
+                avatarEl.style.setProperty('--avatar-img', `url(${p.avatarImage})`);
+                avatarEl.classList.add('has-image');
+            } else {
+                avatarEl.style.setProperty('--avatar-img', 'none');
+                avatarEl.classList.remove('has-image');
+            }
+            
+            // Aplica o emoji/foto no modal (se já existir no DOM)
             if (document.getElementById('pfAvatarBig')) document.getElementById('pfAvatarBig').textContent = p.avatar || '👣';
             if (document.getElementById('stampBadge')) document.getElementById('stampBadge').textContent = p.avatar || '👣';
         }
@@ -711,6 +734,17 @@
             document.getElementById('pfName').value = p.name !== 'Aventureiro' ? p.name : '';
             document.getElementById('pfCity').value = p.city || '';
             document.getElementById('pfAvatarBig').textContent = p.avatar || '👣';
+
+            // Exibir prévia da imagem e esconder o emoji
+            const previewEl = document.getElementById('pfPhotoPreview');
+            if (p.avatarImage) {
+                previewEl.src = p.avatarImage;
+                previewEl.style.display = 'block';
+                document.getElementById('pfAvatarBig').textContent = ''; // Esconde o emoji grande
+            } else {
+                previewEl.style.display = 'none';
+                document.getElementById('pfAvatarBig').textContent = p.avatar || '👣'; // Mostra o emoji grande
+            }
         }
 
         function closeProfile() {
@@ -720,8 +754,13 @@
         function saveProfile() {
             const name = document.getElementById('pfName').value.trim() || 'Aventureiro';
             const city = document.getElementById('pfCity').value.trim() || '';
-            const avatar = document.getElementById('pfAvatarBig').textContent || '👣';
-            saveProfileObj({ name, city, avatar });
+            
+            // Preserva a imagem e o avatar/emoji atual
+            const currentProfile = loadProfile(); 
+            const avatar = currentProfile.avatar || '👣';
+            const avatarImage = currentProfile.avatarImage || null;
+            
+            saveProfileObj({ name, city, avatar, avatarImage }); // Salva todos os dados
             closeProfile();
         }
         
@@ -734,6 +773,40 @@
         function exportProfile() { /* Lógica de exportação mantida */ } 
         function importProfile() { /* Lógica de importação mantida */ } 
         applyProfile();
+
+        // Lógica para carregar a imagem de perfil e converter para Base64
+        function handleAvatarUpload() {
+            const file = document.getElementById('pfPhotoInput').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result; // Imagem em Base64
+                
+                const p = loadProfile();
+                p.avatarImage = imageData;
+                p.avatar = '📸'; // Usa um emoji de câmera para indicar que há uma foto
+                saveProfileObj(p);
+                
+                // Atualiza o modal de perfil
+                const previewEl = document.getElementById('pfPhotoPreview');
+                previewEl.src = imageData;
+                previewEl.style.display = 'block';
+                document.getElementById('pfAvatarBig').textContent = ''; 
+
+                // Limpa o input file para permitir novo upload
+                document.getElementById('pfPhotoInput').value = ''; 
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Adiciona o listener para o campo de upload
+        document.addEventListener('DOMContentLoaded', () => {
+            const pfInput = document.getElementById('pfPhotoInput');
+            if(pfInput) {
+                pfInput.addEventListener('change', handleAvatarUpload);
+            }
+        });
 
 
         // ------------------ CARIMBO DIGITAL (CANVAS) ------------------
@@ -771,9 +844,10 @@
             const img = new Image();
             img.crossOrigin = 'anonymous'; // Necessário para imagens externas
             img.onload = () => {
-                // Dimensões do Canvas (Proporção 3:2, ideal para redes sociais)
-                canvas.width = 1200;
-                canvas.height = 800;
+
+                // Dimensões do Canvas (Proporção 4:5 - Vertical para Instagram)
+                canvas.width = 960;
+                canvas.height = 1200;
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -785,57 +859,70 @@
 
                 // Overlay inferior (para texto)
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.fillRect(0, canvas.height - 180, canvas.width, 180);
+                ctx.fillRect(0, 1020, canvas.width, 180);
 
-                // Texto: Nome do Parque
-                ctx.fillStyle = '#fff';
-                ctx.font = '700 50px "Lato"';
-                ctx.textAlign = 'left';
-                ctx.fillText(currentPark.name, 50, canvas.height - 110);
-                
-                // Texto: Localização e Perfil
-                ctx.font = '400 24px "Open Sans"';
-                ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 50, canvas.height - 65);
+// NOVO: Ícone de Check-in (Selo Verde)
+ctx.fillStyle = '#17A589'; // Cor Primary (Verde)
+ctx.font = '700 40px "Lato"'; // Tamanho do ícone
+ctx.textAlign = 'left';
+ctx.fillText('✅', 40, 1070); // Y = 1070 (Posiciona o ícone verde na esquerda)
+
+// Texto: Nome do Parque (Agora um pouco mais à direita do ícone e ligeiramente abaixo)
+ctx.fillStyle = '#fff';
+ctx.font = '700 45px "Lato"';
+ctx.textAlign = 'left';
+ctx.fillText(currentPark.name, 90, 1075); // X = 90 (ao lado do ícone), Y = 1075
+
+// Texto: Localização e Perfil (Descido um pouco para dar espaço)
+ctx.font = '400 24px "Open Sans"';
+ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y = 1140
+
 
                 // Badge do Avatar (Círculo)
-                const cx = canvas.width - 120, cy = canvas.height - 90, r = 70;
+                const cx = canvas.width - 100, cy = 1110, r = 60;
                 ctx.beginPath();
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.arc(cx, cy, r, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.closePath();
 
-                // Avatar como Texto
-                ctx.fillStyle = 'var(--color-primary)';
-                ctx.font = '700 50px "Lato"';
-                ctx.textAlign = 'center';
-                ctx.fillText(profile.avatar || '👣', cx, cy + 18);
+                // LÓGICA DE DESENHO ASSÍNCRONO DA FOTO DO PERFIL OU EMOJI
+                if (profile.avatarImage) {
+                    const profileImg = new Image();
+                    profileImg.onload = () => {
+                        // Desenha a imagem cortada como um círculo (máscara)
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r - 2, 0, Math.PI * 2, true);
+                        ctx.clip();
 
-                // Gerar Blob e salvar no LocalStorage
-                canvas.toBlob(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const stamps = JSON.parse(localStorage.getItem('explorerStamps') || '[]');
-                    const entry = { id: Date.now(), parkId: currentPark.id, parkName: currentPark.name, ts: new Date().toISOString(), url };
-                    stamps.push(entry);
-                    localStorage.setItem('explorerStamps', JSON.stringify(stamps));
-
-                    refreshMyStamps();
-                    setStampButtonsEnabled(true);
-
-                    // Auto-download e Share
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = currentPark.id + '-carimbo.png';
-                    a.click();
-                    
-                    if (navigator.share) {
-                        fetch(url).then(r => r.blob()).then(b => {
-                            const f = new File([b], currentPark.id + '-carimbo.png', { type: 'image/png' });
-                            navigator.share({ files: [f], title: 'Check-in: ' + currentPark.name, text: profile.name + ' carimbou sua aventura!' }).catch(() => {});
-                        });
+                        // Cálculo para centralizar a imagem
+                        const imgRatio = Math.max((r * 2) / profileImg.width, (r * 2) / profileImg.height);
+                        const imgW = profileImg.width * imgRatio;
+                        const imgH = profileImg.height * imgRatio;
+                        const imgX = cx - imgW / 2;
+                        const imgY = cy - imgH / 2;
+                        
+                        ctx.drawImage(profileImg, imgX, imgY, imgW, imgH);
+                        
+                        ctx.restore();
+                        
+                        // Finaliza (chama o download)
+                        finalizeStampGeneration();
+                    };
+                    profileImg.onerror = () => {
+                        // Em caso de falha no carregamento, desenha o emoji
+                        drawAvatarEmoji();
+                        finalizeStampGeneration();
                     }
-                }, 'image/png');
-            };
+                    profileImg.src = profile.avatarImage;
+                } else {
+                    // Se não houver foto, desenha o emoji e finaliza
+                    drawAvatarEmoji();
+                    finalizeStampGeneration();
+                }
+
+            }; // Fim do img.onload
             
             img.onerror = () => {
                 errorEl.textContent = 'Erro ao carregar a imagem. Verifique a URL (CORS) ou tente outra foto.';
@@ -849,6 +936,49 @@
             } else {
                 img.src = URL.createObjectURL(file);
             }
+        }
+
+        // Funções locais adicionadas para lidar com o desenho assíncrono do avatar.
+        function drawAvatarEmoji() {
+            // Estas variáveis (cx, cy, r) serão definidas na generateStamp
+            const profile = loadProfile();
+            const cx = canvas.width - 100, cy = 1110, r = 60; // Redefinidas aqui para escopo
+
+            ctx.fillStyle = 'var(--color-primary)';
+            ctx.font = '700 40px "Lato"';
+            ctx.textAlign = 'center';
+            ctx.fillText(profile.avatar || '👣', cx, cy + 15);
+        }
+
+        function finalizeStampGeneration() {
+            // Código original de geração de Blob e download (movido para cá)
+            const profile = loadProfile();
+            // Pega o currentParkId do localStorage
+            const currentPark = allParks.find(p => p.id === localStorage.getItem('currentParkId')); 
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const stamps = JSON.parse(localStorage.getItem('explorerStamps') || '[]').slice();
+                const entry = { id: Date.now(), parkId: currentPark.id, parkName: currentPark.name, ts: new Date().toISOString(), url };
+                stamps.push(entry);
+                localStorage.setItem('explorerStamps', JSON.stringify(stamps));
+
+                refreshMyStamps();
+                setStampButtonsEnabled(true);
+
+                // Auto-download e Share
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentPark.id + '-carimbo.png';
+                a.click();
+                
+                if (navigator.share) {
+                    fetch(url).then(r => r.blob()).then(b => {
+                        const f = new File([b], currentPark.id + '-carimbo.png', { type: 'image/png' });
+                        navigator.share({ files: [f], title: 'Check-in: ' + currentPark.name, text: profile.name + ' carimbou sua aventura!' }).catch(() => {});
+                    });
+                }
+            }, 'image/png');
         }
 
         function refreshMyStamps() {
