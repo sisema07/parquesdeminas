@@ -414,11 +414,13 @@
                     <input type="text" id="pfCity" placeholder="Cidade (Opcional)" />
                     <input type="file" id="pfPhotoInput" accept="image/*" style="margin-bottom: 8px;" />
                     <img id="pfPhotoPreview" style="display:none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;" alt="Prévia da foto de perfil" />
-                    <div class="input-group" style="margin-top: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="saveProfile()">Salvar Perfil</button>
-                        <button class="btn btn-secondary" onclick="pickRandomAvatar()">Avatar Aleatório</button>
-                        <button class="btn btn-secondary" onclick="exportProfile()">Exportar</button>
-                    </div>
+<div class="input-group" style="margin-top: 10px; flex-wrap: wrap;">
+    <button class="btn btn-primary" onclick="saveProfile()">Salvar Perfil</button>
+    <button class="btn btn-secondary" onclick="exportProfile()">Exportar</button>
+</div>
+<h5 style="margin-top: 20px;">Escolha um Avatar Temático:</h5>
+<div id="themedAvatarGallery" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+    </div>
                 </div>
             </div>
         </div>
@@ -693,7 +695,12 @@
 
         // ------------------ PERFIL E LOCALSTORAGE ------------------
 
-        const defaultProfile = { name: 'Aventureiro', city: '', avatar: '👣', avatarImage: null }; // Adiciona a chave para a imagem
+        const defaultProfile = { 
+            name: 'Aventureiro', 
+            city: '', 
+            avatar: '📸', // Usa o ícone de foto como default para avatares baseados em imagem
+            avatarImage: 'https://sisema07.github.io/parquesdeminas/avatar/Lobo-Guara.png' // Use um dos seus links aqui
+        };
 
         function loadProfile() {
             const raw = localStorage.getItem('explorerProfile');
@@ -723,8 +730,8 @@
             }
             
             // Aplica o emoji/foto no modal (se já existir no DOM)
-            if (document.getElementById('pfAvatarBig')) document.getElementById('pfAvatarBig').textContent = p.avatar || '👣';
-            if (document.getElementById('stampBadge')) document.getElementById('stampBadge').textContent = p.avatar || '👣';
+            if (document.getElementById('pfAvatarBig')) document.getElementById('pfAvatarBig').textContent = p.avatar || '📸';
+            if (document.getElementById('stampBadge')) document.getElementById('stampBadge').textContent = p.avatar || '📸';
         }
 
         function openProfile() {
@@ -733,7 +740,7 @@
             const p = loadProfile();
             document.getElementById('pfName').value = p.name !== 'Aventureiro' ? p.name : '';
             document.getElementById('pfCity').value = p.city || '';
-            document.getElementById('pfAvatarBig').textContent = p.avatar || '👣';
+            document.getElementById('pfAvatarBig').textContent = p.avatar || '📸';
 
             // Exibir prévia da imagem e esconder o emoji
             const previewEl = document.getElementById('pfPhotoPreview');
@@ -743,8 +750,11 @@
                 document.getElementById('pfAvatarBig').textContent = ''; // Esconde o emoji grande
             } else {
                 previewEl.style.display = 'none';
-                document.getElementById('pfAvatarBig').textContent = p.avatar || '👣'; // Mostra o emoji grande
+                document.getElementById('pfAvatarBig').textContent = p.avatar || '📸'; // Mostra o ícone fallback
             }
+            
+            // Chama para desenhar a galeria de avatares temáticos
+            renderThemedAvatars(); 
         }
 
         function closeProfile() {
@@ -757,22 +767,85 @@
             
             // Preserva a imagem e o avatar/emoji atual
             const currentProfile = loadProfile(); 
-            const avatar = currentProfile.avatar || '👣';
+            const avatar = currentProfile.avatar || '📸';
             const avatarImage = currentProfile.avatarImage || null;
             
             saveProfileObj({ name, city, avatar, avatarImage }); // Salva todos os dados
             closeProfile();
         }
         
-        function pickRandomAvatar() { 
-            const avs = ['🌿', '🪵', '🏞️', '🦋', '🐦', '🌄', '👣', '✨', '🧭', '🌲']; 
-            const a = avs[Math.floor(Math.random() * avs.length)]; 
-            document.getElementById('pfAvatarBig').textContent = a; 
-        }
-
         function exportProfile() { /* Lógica de exportação mantida */ } 
         function importProfile() { /* Lógica de importação mantida */ } 
         applyProfile();
+
+        // NOVO: Lista FIXA de avatares temáticos (use emojis ou URLs)
+        const THEMED_AVATARS = [
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Lobo-Guara.png', name: 'Lobo-Guará' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Macaco-Barbado.png', name: 'Macaco Barbado' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Macaco-Barbado2.png', name: 'Macaco Barbado2' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Onça-parda.png', name: 'Onça-parda' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/jaguatirica2.png', name: 'Jaguatirica' }
+        ];
+
+        // NOVO: Função para renderizar a galeria e adicionar listeners
+        function renderThemedAvatars() {
+            const gallery = document.getElementById('themedAvatarGallery');
+            if (!gallery) return;
+            
+            gallery.innerHTML = ''; // Limpa a galeria
+            
+            THEMED_AVATARS.forEach(avatar => {
+                const el = document.createElement('div');
+                el.style.width = '40px';
+                el.style.height = '40px';
+                el.style.borderRadius = '50%';
+                el.style.background = 'var(--color-secondary)';
+                el.style.color = 'var(--color-card)';
+                el.style.display = 'flex';
+                el.style.justifyContent = 'center';
+                el.style.alignItems = 'center';
+                el.style.fontSize = '22px';
+                el.style.cursor = 'pointer';
+                el.style.border = '2px solid transparent';
+                el.title = avatar.name; // Dica de nome
+                
+                if (avatar.type === 'emoji') {
+                    el.textContent = avatar.value;
+                } else if (avatar.type === 'image') {
+                    // Se for imagem, usa background-image para exibir a foto
+                    el.style.backgroundImage = `url(${avatar.value})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center'; // Adicionado para centralizar a imagem
+                    el.textContent = '';
+                }
+
+                // Adiciona o evento de clique para seleção
+                el.addEventListener('click', () => selectThemedAvatar(avatar));
+                gallery.appendChild(el);
+            });
+        }
+
+        // NOVO: Função para aplicar o avatar selecionado
+        function selectThemedAvatar(avatar) {
+            // 1. Desativa a foto de perfil (se houver)
+            const p = loadProfile();
+            p.avatarImage = null; 
+            
+            // 2. Define o novo avatar (emoji ou imagem)
+            if (avatar.type === 'emoji') {
+                p.avatar = avatar.value;
+            } else {
+                // Se for imagem, define um emoji padrão (ex: 📸) e salva a URL na imagem
+                p.avatar = '📸'; 
+                p.avatarImage = avatar.value;
+            }
+            
+            // 3. Salva e atualiza o perfil em todos os lugares
+            saveProfileObj(p);
+            
+            // 4. Reabre o modal para atualizar a visualização corretamente
+            openProfile(); 
+        }
 
         // Lógica para carregar a imagem de perfil e converter para Base64
         function handleAvatarUpload() {
@@ -822,8 +895,8 @@
         function setStampButtonsEnabled(enabled) {
             btnGenerate.disabled = !enabled;
             btnQuick.disabled = !enabled;
-            btnGenerate.textContent = enabled ? 'Gerar Carimbo (Foto)' : 'Processando...';
-            btnQuick.textContent = enabled ? 'Quick (Hero)' : 'Aguarde...';
+            btnGenerate.textContent = enabled ? 'Com sua foto no parque' : 'Processando...';
+            btnQuick.textContent = enabled ? 'Com imagem do parque' : 'Aguarde...';
         }
 
         function generateStamp(quick) {
@@ -861,21 +934,21 @@
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                 ctx.fillRect(0, 1020, canvas.width, 180);
 
-// NOVO: Ícone de Check-in (Selo Verde)
-ctx.fillStyle = '#17A589'; // Cor Primary (Verde)
-ctx.font = '700 40px "Lato"'; // Tamanho do ícone
-ctx.textAlign = 'left';
-ctx.fillText('✅', 40, 1070); // Y = 1070 (Posiciona o ícone verde na esquerda)
+                // NOVO: Ícone de Check-in (Selo Verde)
+                ctx.fillStyle = '#17A589'; // Cor Primary (Verde)
+                ctx.font = '700 40px "Lato"'; // Tamanho do ícone
+                ctx.textAlign = 'left';
+                ctx.fillText('✅', 40, 1070); // Y = 1070 (Posiciona o ícone verde na esquerda)
 
-// Texto: Nome do Parque (Agora um pouco mais à direita do ícone e ligeiramente abaixo)
-ctx.fillStyle = '#fff';
-ctx.font = '700 45px "Lato"';
-ctx.textAlign = 'left';
-ctx.fillText(currentPark.name, 90, 1075); // X = 90 (ao lado do ícone), Y = 1075
+                // Texto: Nome do Parque (Agora um pouco mais à direita do ícone e ligeiramente abaixo)
+                ctx.fillStyle = '#fff';
+                ctx.font = '700 45px "Lato"';
+                ctx.textAlign = 'left';
+                ctx.fillText(currentPark.name, 90, 1075); // X = 90 (ao lado do ícone), Y = 1075
 
-// Texto: Localização e Perfil (Descido um pouco para dar espaço)
-ctx.font = '400 24px "Open Sans"';
-ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y = 1140
+                // Texto: Localização e Perfil (Descido um pouco para dar espaço)
+                ctx.font = '400 24px "Open Sans"';
+                ctx.fillText(`📍 ${currentPark.city} | 📸 ${profile.name}`, 40, 1140); // Y = 1140 (Alterado 👣 para 📸)
 
 
                 // Badge do Avatar (Círculo)
@@ -889,6 +962,8 @@ ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y 
                 // LÓGICA DE DESENHO ASSÍNCRONO DA FOTO DO PERFIL OU EMOJI
                 if (profile.avatarImage) {
                     const profileImg = new Image();
+                    profileImg.crossOrigin = 'anonymous'; // CORREÇÃO CORS
+
                     profileImg.onload = () => {
                         // Desenha a imagem cortada como um círculo (máscara)
                         ctx.save();
@@ -912,13 +987,13 @@ ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y 
                     };
                     profileImg.onerror = () => {
                         // Em caso de falha no carregamento, desenha o emoji
-                        drawAvatarEmoji();
+                        drawAvatarEmoji(cx, cy); // Passa cx e cy
                         finalizeStampGeneration();
                     }
                     profileImg.src = profile.avatarImage;
                 } else {
                     // Se não houver foto, desenha o emoji e finaliza
-                    drawAvatarEmoji();
+                    drawAvatarEmoji(cx, cy); // Passa cx e cy
                     finalizeStampGeneration();
                 }
 
@@ -938,23 +1013,26 @@ ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y 
             }
         }
 
-        // Funções locais adicionadas para lidar com o desenho assíncrono do avatar.
-        function drawAvatarEmoji() {
-            // Estas variáveis (cx, cy, r) serão definidas na generateStamp
+        // Funções auxiliares movidas para fora da generateStamp
+        function drawAvatarEmoji(cx, cy) {
             const profile = loadProfile();
-            const cx = canvas.width - 100, cy = 1110, r = 60; // Redefinidas aqui para escopo
-
+            
+            // Desenha o fallback (ícone '📸' na posição central do avatar)
             ctx.fillStyle = 'var(--color-primary)';
             ctx.font = '700 40px "Lato"';
             ctx.textAlign = 'center';
-            ctx.fillText(profile.avatar || '👣', cx, cy + 15);
+            ctx.fillText(profile.avatar || '📸', cx, cy + 15);
         }
 
         function finalizeStampGeneration() {
-            // Código original de geração de Blob e download (movido para cá)
             const profile = loadProfile();
-            // Pega o currentParkId do localStorage
             const currentPark = allParks.find(p => p.id === localStorage.getItem('currentParkId')); 
+
+            // Segurança: Se o parque não for encontrado (nunca deve ocorrer), paramos
+            if (!currentPark) {
+                setStampButtonsEnabled(true);
+                return;
+            }
 
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
@@ -980,6 +1058,7 @@ ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y 
                 }
             }, 'image/png');
         }
+
 
         function refreshMyStamps() {
             const container = document.getElementById('myStamps');
@@ -1043,5 +1122,6 @@ ctx.fillText(`📍 ${currentPark.city} | 👣 ${profile.name}`, 40, 1140); // Y 
         })();
 
     </script>
+</script>
 </body>
 </html>
