@@ -49,46 +49,108 @@
         h3 {font-size: 18px;}
         .text-muted {color: var(--color-muted); font-size: 14px;}
 
-        /* 3. Componentes Básicos (Botões e Inputs) */
-        .btn {
-            padding: 10px 18px;
-            border-radius: var(--border-radius-sm);
-            border: 1px solid transparent;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            font-size: 14px;
-        }
-        .btn-primary {
-            background: var(--color-primary);
-            color: var(--color-card);
-            border-color: var(--color-primary);
-        }
-        .btn-primary:hover {
-            background: #148f77;
-        }
-        .btn-secondary {
-            background: var(--color-card);
-            color: var(--color-primary);
-            border-color: var(--color-primary);
-        }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+/* 3. Componentes Básicos (Botões e Inputs) - NOVO ESTILO MODERNO */
+.btn {
+    padding: 12px 20px; /* Mais padding */
+    border-radius: var(--border-radius-sm);
+    border: none; /* Remove a borda padrão */
+    font-weight: 700; /* Mais peso na fonte */
+    cursor: pointer;
+    transition: all 0.2s ease-in-out, transform 0.1s;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra externa suave */
+    position: relative;
+    overflow: hidden; /* Para o efeito de hover */
+}
+/* Efeito de click "3D" */
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-card);
+    /* Adiciona um gradiente e sombra interna sutil (Neumorfismo/3D) */
+    box-shadow: 0 4px 10px var(--color-shadow), inset 0 2px 5px rgba(255, 255, 255, 0.2), inset 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+.btn-primary:hover {
+    background: #148f77; /* Cor mais escura para hover */
+}
+.btn-secondary {
+    background: var(--color-card);
+    color: var(--color-secondary); /* Cor secundária mais presente */
+    border: 2px solid var(--color-secondary); /* Borda mais grossa */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.btn-secondary:hover {
+    background: #f0f0f0;
+}
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    transform: none; /* Desativa o efeito de click */
+}
 
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        input[type="text"], input[type="file"], textarea {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: var(--border-radius-sm);
-            flex-grow: 1;
-            font-family: var(--font-family-body);
-        }
+/* INPUTS: Apenas garantindo que o input file não herde estilo de botão */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+input[type="text"], textarea { /* input[type="file"] removido daqui para o novo bloco abaixo */
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius-sm);
+    flex-grow: 1;
+    font-family: var(--font-family-body);
+    transition: border-color 0.2s;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Sombra interna para profundidade */;
+    width: 100%
+}
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(23, 165, 137, 0.2);
+}
+
+/* 8. Estilo Moderno de Upload (File Input) - NOVO */
+.file-upload-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    flex-grow: 1;
+}
+.file-upload-wrapper input[type="file"] {
+    /* Esconde o input file padrão, mas mantém a funcionalidade */
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+.file-upload-label {
+    /* Estiliza o novo 'botão' que vai substituir o input file */
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+    background: var(--color-background);
+    color: var(--color-primary);
+    border: 2px dashed var(--color-primary);
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+}
+.file-upload-label:hover {
+    background: #e9f5f2;
+}
 
         /* 4. Header e Perfil (FAB) */
         header {
@@ -263,7 +325,7 @@
         }
         .modal-hero {
             width: 100%;
-            height: 250px;
+            height: 400px;
             object-fit: cover;
             border-radius: var(--border-radius-sm);
             margin-bottom: 15px;
@@ -379,13 +441,11 @@
         </div>
 
         <h2 style="margin-top: 20px;">Mapa da Aventura</h2>
-        <p class="text-muted" style="margin-bottom: 15px;">Use este mapa interativo (Google My Maps) para planejar sua rota por Minas Gerais.</p>
+        <p class="text-muted" style="margin-bottom: 15px;"></p>
         <div class="map-embed-box" style="height: 350px;">
             <iframe id="mapFrame" src="about:blank" allowfullscreen></iframe>
         </div>
-        <div style="text-align: right; margin-top: 10px;">
-            <button class="btn btn-secondary" id="useMyMapsBtn">Personalizar Mapa</button>
-        </div>
+
         
         <h2 style="margin-top: 30px;">Próximos Destinos</h2>
         <div id="loadingMessage" class="text-muted" style="text-align: center; padding: 20px;">Carregando trilhas...</div>
@@ -399,32 +459,40 @@
 
     </div>
 
-    <div id="modalProfile" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Seu Diário de Bordo</h3>
-                <button class="btn btn-secondary" onclick="closeProfile()">Fechar</button>
-            </div>
-            
-            <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                <div class="stamp-badge" style="width: 80px; height: 80px; font-size: 40px;" id="pfAvatarBig">👣</div>
-                <div style="flex-grow: 1;">
-                    <p class="text-muted">Seu nome e avatar para o carimbo digital.</p>
-                    <input type="text" id="pfName" placeholder="Seu Apelido de Aventureiro" style="margin-bottom: 8px;" />
-                    <input type="text" id="pfCity" placeholder="Cidade (Opcional)" />
-                    <input type="file" id="pfPhotoInput" accept="image/*" style="margin-bottom: 8px;" />
-                    <img id="pfPhotoPreview" style="display:none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;" alt="Prévia da foto de perfil" />
-<div class="input-group" style="margin-top: 10px; flex-wrap: wrap;">
-    <button class="btn btn-primary" onclick="saveProfile()">Salvar Perfil</button>
-    <button class="btn btn-secondary" onclick="exportProfile()">Exportar</button>
-</div>
-<h5 style="margin-top: 20px;">Escolha um Avatar Temático:</h5>
-<div id="themedAvatarGallery" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-    </div>
+<div id="modalProfile" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Perfil</h3>
+            <button class="btn btn-secondary" onclick="closeProfile()">Fechar</button>
+        </div>
+        
+        <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <div style="flex-grow: 1;">
+                <p class="text-muted" style="margin-bottom: 12px;">Seu nome e foto para o carimbo digital.</p>
+                
+                <div class="input-group" style="margin-bottom: 12px;">
+                    <input type="text" id="pfName" placeholder="Seu Apelido de Aventureiro"/> 
+                    <input type="text" id="pfCity" placeholder="Cidade (Opcional)"/>
                 </div>
-            </div>
+                
+                <div class="file-upload-wrapper" style="margin-bottom: 12px;"> 
+                    <input type="file" id="pfPhotoInput" accept="image/*" />
+                    <label for="pfPhotoInput" class="file-upload-label" id="pfPhotoLabel">
+                        📷 Selecionar Foto de Perfil
+                    </label>
+                </div>
+                
+                <img id="pfPhotoPreview" style="display:none; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 10px;" alt="Prévia da foto de perfil" />
+                
+                <div class="input-group" style="margin-top: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="saveProfile()">Salvar Perfil</button>
+                    <button class="btn btn-secondary" onclick="exportProfile()">Exportar</button>
+                </div>
+                
+                </div>
         </div>
     </div>
+</div>
 
     <div id="modalPark" class="modal">
         <div class="modal-content">
@@ -459,7 +527,12 @@
                     <p class="text-muted">Gere seu carimbo personalizado com a foto da sua aventura para compartilhar nas redes sociais!</p>
                     
                     <div class="input-group" style="flex-direction: column;">
-                        <input type="file" id="photoInput" accept="image/*" />
+<div class="file-upload-wrapper">
+    <input type="file" id="photoInput" accept="image/*" />
+    <label for="photoInput" class="file-upload-label" id="photoInputLabel">
+        📸 Escolher Foto da Aventura (Opcional)
+    </label>
+</div>
                         <span class="text-muted" id="errorStamp" style="color: #c0392b; display: none;"></span>
                         <div class="input-group" style="margin-bottom: 0;">
                             <button class="btn btn-primary" id="btnGenerate">Com sua foto no parque</button>
@@ -504,7 +577,21 @@
     // **********************************************************************************
 
     const RAW_PARKS_DATA = [
-        // --- PARQUE 1: IBITIPOCA (Exemplo de Parque Difícil) ---
+        // --- PARQUE 1: BIRIBIRI (Exemplo de Parque Médio) ---
+        { 
+            id: 'biribiri', 
+            name: 'Parque Estadual do Biribiri', 
+            city: 'Diamantina', 
+            difficulty: 'Médio', 
+            time: '2-8h', 
+            tags: ['Médio', 'Cachoeira', 'Mirante', 'Pintura rupestre', 'Vila do Biribiri'],
+            trails_info: `O parque possui diversas trilhas, dentre elas as mais visitadas são as trilhas da Sentinela, dos Cristais e do Caminho dos Escravos. As trilhas da Sentinela e dos Cristais possuem 5km e 9km de extensão, respectivamente, e iniciam-se na portaria do parque, porém com traçado distinto da estrada. Apresentam um grau médio de dificuldade. Elas são bem sinalizadas e, portanto, não há necessidade de guia. O caminho dos escravos trata-se de uma passagem construída no século XVIII para possibilitar o escoamento da produção de diamantes da região. O caminho inicia-se no centro de Diamantina e finaliza no distrito de Mendanha, com extensão total de 20km. O trecho no interior do parque é de aproximadamente 16km de extensão. Parte deste caminho foi calçado por escravos e próximo a trilha existem diversos poços e cachoeiras. Recomenda-se o acompanhamento de guia.`, 
+            hero: 'https://sisema07.github.io/parquesdeminas/Biribiri-Portaria.png', 
+            about: 'Localizado na porção central da Serra do Espinhaço, região que foi reconhecida como Reserva da Biosfera, pela Unesco em 2005. Inserido no bioma do Cerrado, o Parque possui fauna e flora bastante diversificada sendo que muitas de suas espécies estão entre aquelas consideradas ameaçadas de extinção, tais como: lobo-guará, sussuarana, veado, sempre-vivas, orquídeas, bromélias, canelas-de-ema, dentre outras. Nos locais de afloramento rochoso, com altitude acima dos 900 metros em relação ao nível do mar, há ocorrência da fitofisionomia de campos rupestres que se destacam, por exemplo, pela ocorrência marcante de sempre-vivas e canelas-de-ema.', 
+            gallery: ['https://sisema07.github.io/parquesdeminas/Biribiri-Portaria.png', 'https://ief.mg.gov.br/documents/51853/7580733/Cachoeira_dos_cristais/4e1537c7-9598-79cd-886a-83a55edc83e4', 'https://ief.mg.gov.br/documents/51853/7580733/cachoeira_Sentinela/2083d28a-4b08-78c6-4939-6344d30ce28f', 'https://ief.mg.gov.br/documents/51853/7580733/Parque_Estadual_do_Biribiri_-_Cachoeira_Sentinela/55dbf035-ddaa-89ad-4eb7-713a7e286a70', 'https://ief.mg.gov.br/documents/51853/7580733/Biribiri/813d84e3-fd2d-71ed-d4b1-8f480b609242', 'https://ief.mg.gov.br/documents/51853/7580733/DSC_7828/c556eba4-7871-362f-1085-d822186120cd', 'https://ief.mg.gov.br/documents/51853/7580733/IMG_7242/72372610-5314-b41d-4e07-1443fec4c8d2'], 
+            mapEmbedUrl: ''
+        },
+        // --- PARQUE 2: IBITIPOCA (Exemplo de Parque Difícil) ---
         { 
             id: 'ibitipoca', 
             name: 'Parque Estadual do Ibitipoca', 
@@ -513,22 +600,23 @@
             time: '4-6h', 
             tags: ['Difícil', 'Cachoeira', 'Mirante'], 
             trails_info: `Circuito das Águas: Com 5,2km ida/volta e duração média de 5h, subidas e descidas íngremes. Ao longo da trilha existem mirantes que foram instalados como forma de promover segurança e conforto ao visitante, além de possibilitar a contemplação da paisagem. | Circuito do Pião: Este circuito possui um percurso longo, com aproximadamente 9,5km ida/volta e duração média de 6h, com muitas subidas e descidas íngremes. | Circuito Janela do Céu: Esse circuito tem o limite para receber até 240 visitantes ao dia. É um percurso mais longo, com 16km ida/volta, com subidas e decidas íngremes, que exige preparo físico por conta de sua duração. | Cachoeira dos Macacos: Perfeita para banho em águas | Cachoeira do Encanto Um refúgio natural para relaxar`,
-            hero: 'https://sisema07.github.io/parquesdeminas/Ibitipoca.jpg',
+            hero: 'https://ief.mg.gov.br/documents/51853/7558585/Portaria/5e2a35cd-67d1-d786-6aa9-d2a67a718e7f',
             about: 'Localizado nos municípios de Lima Duarte e Santa Rita do Ibitipoca, fazendo divisa com Bias Fortes, o Parque Estadual do Ibitipoca é um dos mais famosos destinos de ecoturismo de Minas Gerais. Inserido no bioma Mata Atlântica, apresenta lagos, cachoeiras, grutas e mirantes impressionantes. Entre os atrativos principais estão a Ponte de Pedra, a Janela do Céu, o Pico do Pião e a Gruta dos Três Arcos. A biodiversidade local reúne espécies raras e ameaçadas. A visitação é controlada, com venda de ingressos online ou diretamente na bilheteria, garantindo preservação ambiental e qualidade da experiência. Suas trilhas bem estruturadas fazem do parque um destino ímpar para contato com a natureza, turismo de aventura e contemplação.',  
-            gallery: ['https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=800', 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=800'], 
-            mapEmbedUrl: 'https://expressinha.com/wp-content/uploads/2019/06/mapa-ibitipoca.jpg'
+            gallery: ['https://ief.mg.gov.br/documents/51853/7558585/Portaria/5e2a35cd-67d1-d786-6aa9-d2a67a718e7f', 'https://ief.mg.gov.br/documents/51853/7558585/Cruzeiro/6bd95b8e-d877-98e8-ac9e-4b860873c272', 'https://ief.mg.gov.br/documents/51853/7558585/Janela-do-ceu/6892d04e-dcfe-def2-84b1-3437c048ca81', 'https://ief.mg.gov.br/documents/51853/7558585/Gruta/471193b8-42d7-cda0-5ed8-e406ce340b2b', 'https://ief.mg.gov.br/documents/51853/7558585/Trilha/e47c2c8d-f354-0c82-da16-66cd096ae338', 'https://ief.mg.gov.br/documents/51853/7558585/Centro_de_Visitantes/03ace2fb-c03e-6f57-bdf2-59753934e974'], 
+            mapEmbedUrl: 'https://www.google.com/maps/d/embed?mid=1WU17wqpnnKkLxRN9ldTy0zGaf_fX_8Q&ehbc=2E312F'
         },
-        // --- PARQUE 2: SERRA DO CIPÓ (Exemplo de Parque Médio) ---
+        // --- PARQUE 3: Itacolomi (Exemplo de Parque Médio) ---
         { 
-            id: 'cipo', 
-            name: 'Parque Nacional da Serra do Cipó', 
-            city: 'Serra do Cipó', 
+            id: 'itacolomi', 
+            name: 'Parque Estadual do Itacolomi', 
+            city: 'Ouro Preto e Mariana', 
             difficulty: 'Médio', 
             time: '2-8h', 
-            tags: ['Médio', 'Cachoeira', 'Vegetação'], 
-            hero: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Parque_Nacional_da_Serra_do_Cip%C3%B3.jpg', 
-            about: 'Vasta área na Serra do Espinhaço, conhecida por suas imensas cachoeiras (como a Véu da Noiva) e a rica flora do Cerrado e Campos Rupestres.', 
-            gallery: ['https://images.unsplash.com/photo-1499394153797-499f5d8f2b51?q=80&w=800', 'https://images.unsplash.com/photo-1517457813264-500e5728a306?q=80&w=800'], 
+            tags: ['Médio', 'Cachoeira', 'Vegetação'],
+            trails_info: `O parque conta com diversas trilhas, como a Trilha do Pico do Itacolomi, com 6 km de extensão (a partir do Centro de Visitantes), que leva 4 horas (ida e volta) em dificuldade Média para Alta e oferece uma vista de 360º de Ouro Preto e serras. A Trilha dos Sentidos é curta, dura cerca de 40 minutos e proporciona uma aventura sensorial, exigindo agendamento prévio. A Trilha do Forno tem 1.200 metros, dura aproximadamente 1 hora, é de acesso fácil e abriga no final as ruínas de um antigo forno. A Trilha da Capela, com 1.400 metros, também dura cerca de 1 hora e tem acesso fácil, iniciando ao lado da Capela de São José e mostrando diferentes vegetações. A Trilha da Lagoa possui 450 metros, dura 20 minutos e circunda a área da Lagoa da Capela, sendo de acesso fácil. A Trilha do Mirante do Custódio tem 6 km, leva 3 horas (ida e volta) com dificuldade Baixa a Média, e avista a Represa do Custódio. Por fim, a Trilha do Mirante do Morro do Cachorro tem 2 km (ida e volta), leva 1h30min, é de dificuldade Média e permite avistar Ouro Preto, Mariana e outras serras.`, 
+            hero: 'https://ief.mg.gov.br/documents/51853/7558741/Portaria/8e0b84fb-cdfc-39d0-f76f-76654d3fdc24', 
+            about: 'O parque abriga o Pico do Itacolomi, com 1.772 metros de altitude, que era ponto de referência para os antigos viajantes da Estrada Real, como o bandeirante paulista Antônio Dias, que o chamava de “Farol dos Bandeirantes”. A palavra itacolomy vem da língua tupi e significa “pedra menino”, os índios viam o pico como o “filhote” da montanha ou “pedra mãe”. A Fazenda São José do Manso, no interior da unidade, era um pólo produtor de chá na primeira metade do século 20, e um exemplar da arquitetura colonial deixado pelos bandeirantes em Minas. Suas matas predominam as quaresmeiras e candeias ao longo dos rios e córregos. Nas partes mais elevadas, aparecem os campos de altitude com afloramentos rochosos, onde se destacam as gramíneas e canelas de emas. Abriga muitas nascentes, escondidas nas matas, que deságuam, em sua maioria, no rio Gualaxo do Sul, afluente do rio Doce. Os mais importantes são os córregos do Manso, dos Prazeres, Domingos e do Benedito, o rio Acima e o ribeirão Belchior. Diversas espécies de animais raros e ameaçados de extinção podem ser encontradas na unidade de conservação, como o lobo guará, a ave-pavó, a onça parda e o andorinhão de coleira (ave migratória). Também podem ser vistas espécies de macacos, micos, tatus, pacas, capivaras e gatos mouriscos. Levantamentos identificaram mais de 200 espécies de aves, como jacus, siriemas e beija-flores.', 
+            gallery: ['https://ief.mg.gov.br/documents/51853/7558741/Portaria/8e0b84fb-cdfc-39d0-f76f-76654d3fdc24', 'https://ief.mg.gov.br/documents/51853/7558741/casa-bandeirista/6ef259c4-1e3a-233c-3f96-bee0a5dc01a1', 'https://ief.mg.gov.br/documents/51853/7558741/centro_visitantes/be8bfaff-c67e-03e5-4330-ba62705ff847', 'https://ief.mg.gov.br/documents/51853/7558741/trilha-bicicleta/8d4f9876-906b-0e43-5b6a-fd5c346d85be', 'https://ief.mg.gov.br/documents/51853/7558741/Pico_do_Itacolomi/620babcf-2c5e-8d7a-685f-13993f750b24', 'https://ief.mg.gov.br/documents/51853/7558741/Pico_visto_OP/c5460de9-1257-2a70-1d15-53becf55f5b5', 'https://ief.mg.gov.br/documents/51853/7558741/camping01/35924228-b6b2-14de-1e58-4aad3a51878e'], 
             mapEmbedUrl: 'SUA_URL_MYMAPS_CIPÓ_AQUI'
         },
         // --- PARQUE 3: SUMIDOURO (Exemplo de Parque Fácil com Gruta) ---
@@ -572,6 +660,17 @@
         }
     ];
     let allParks = [];
+
+        const THEMED_AVATARS = [
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Anta.png', name: 'Anta' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Lobo-guará.png', name: 'Lobo-guará' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Onça-parda.png', name: 'Onça-parda' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Quati.png', name: 'Quati' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Tamanduá.png', name: 'Tamanduá' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Tatu.png', name: 'Tatu' },
+            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Veado.png', name: 'Veado' }
+        ];
+
     let currentFilter = 'all';
 
         // Elementos UI
@@ -695,12 +794,13 @@
 
         // ------------------ PERFIL E LOCALSTORAGE ------------------
 
-        const defaultProfile = { 
-            name: 'Aventureiro', 
-            city: '', 
-            avatar: '📸', // Usa o ícone de foto como default para avatares baseados em imagem
-            avatarImage: 'https://sisema07.github.io/parquesdeminas/avatar/Lobo-Guara.png' // Use um dos seus links aqui
-        };
+
+        const defaultProfile = { 
+            name: 'Aventureiro', 
+            city: '', 
+            avatar: null, // MUDANÇA: Era '📸'. Agora é null.
+            avatarImage: null // MUDANÇA: Era uma URL. Agora é null.
+        };
 
         function loadProfile() {
             const raw = localStorage.getItem('explorerProfile');
@@ -717,8 +817,9 @@
             const p = loadProfile();
             const avatarEl = document.getElementById('avatarEl'); // Elemento no Header
             
-            document.getElementById('profileName').textContent = p.name || 'Visitante';
-            avatarEl.textContent = p.avatar || '👣';
+
+            document.getElementById('profileName').textContent = p.name || 'Visitante';
+            avatarEl.textContent = p.avatar || ''; // MUDANÇA: Usamos string vazia se não houver avatar
             
             // Lógica para mostrar a imagem no header
             if (p.avatarImage) {
@@ -729,9 +830,7 @@
                 avatarEl.classList.remove('has-image');
             }
             
-            // Aplica o emoji/foto no modal (se já existir no DOM)
-            if (document.getElementById('pfAvatarBig')) document.getElementById('pfAvatarBig').textContent = p.avatar || '📸';
-            if (document.getElementById('stampBadge')) document.getElementById('stampBadge').textContent = p.avatar || '📸';
+
         }
 
         function openProfile() {
@@ -778,74 +877,10 @@
         function importProfile() { /* Lógica de importação mantida */ } 
         applyProfile();
 
-        // NOVO: Lista FIXA de avatares temáticos (use emojis ou URLs)
-        const THEMED_AVATARS = [
-            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Lobo-Guara.png', name: 'Lobo-Guará' },
-            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Macaco-Barbado.png', name: 'Macaco Barbado' },
-            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Macaco-Barbado2.png', name: 'Macaco Barbado2' },
-            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/Onça-parda.png', name: 'Onça-parda' },
-            { type: 'image', value: 'https://sisema07.github.io/parquesdeminas/avatar/jaguatirica2.png', name: 'Jaguatirica' }
-        ];
 
-        // NOVO: Função para renderizar a galeria e adicionar listeners
-        function renderThemedAvatars() {
-            const gallery = document.getElementById('themedAvatarGallery');
-            if (!gallery) return;
-            
-            gallery.innerHTML = ''; // Limpa a galeria
-            
-            THEMED_AVATARS.forEach(avatar => {
-                const el = document.createElement('div');
-                el.style.width = '40px';
-                el.style.height = '40px';
-                el.style.borderRadius = '50%';
-                el.style.background = 'var(--color-secondary)';
-                el.style.color = 'var(--color-card)';
-                el.style.display = 'flex';
-                el.style.justifyContent = 'center';
-                el.style.alignItems = 'center';
-                el.style.fontSize = '22px';
-                el.style.cursor = 'pointer';
-                el.style.border = '2px solid transparent';
-                el.title = avatar.name; // Dica de nome
-                
-                if (avatar.type === 'emoji') {
-                    el.textContent = avatar.value;
-                } else if (avatar.type === 'image') {
-                    // Se for imagem, usa background-image para exibir a foto
-                    el.style.backgroundImage = `url(${avatar.value})`;
-                    el.style.backgroundSize = 'cover';
-                    el.style.backgroundPosition = 'center'; // Adicionado para centralizar a imagem
-                    el.textContent = '';
-                }
 
-                // Adiciona o evento de clique para seleção
-                el.addEventListener('click', () => selectThemedAvatar(avatar));
-                gallery.appendChild(el);
-            });
-        }
 
-        // NOVO: Função para aplicar o avatar selecionado
-        function selectThemedAvatar(avatar) {
-            // 1. Desativa a foto de perfil (se houver)
-            const p = loadProfile();
-            p.avatarImage = null; 
-            
-            // 2. Define o novo avatar (emoji ou imagem)
-            if (avatar.type === 'emoji') {
-                p.avatar = avatar.value;
-            } else {
-                // Se for imagem, define um emoji padrão (ex: 📸) e salva a URL na imagem
-                p.avatar = '📸'; 
-                p.avatarImage = avatar.value;
-            }
-            
-            // 3. Salva e atualiza o perfil em todos os lugares
-            saveProfileObj(p);
-            
-            // 4. Reabre o modal para atualizar a visualização corretamente
-            openProfile(); 
-        }
+
 
         // Lógica para carregar a imagem de perfil e converter para Base64
         function handleAvatarUpload() {
@@ -873,13 +908,44 @@
             reader.readAsDataURL(file);
         }
 
-        // Adiciona o listener para o campo de upload
-        document.addEventListener('DOMContentLoaded', () => {
-            const pfInput = document.getElementById('pfPhotoInput');
-            if(pfInput) {
-                pfInput.addEventListener('change', handleAvatarUpload);
-            }
+// NOVO: Função para atualizar o texto do label do input file
+function updateFileInputLabel(inputId, labelId, defaultText, file) {
+    const labelEl = document.getElementById(labelId);
+    if (!labelEl) return;
+
+    if (file) {
+        labelEl.textContent = `✅ Arquivo Selecionado: ${file.name.substring(0, 30)}...`;
+        labelEl.style.borderColor = 'var(--color-primary)';
+        labelEl.style.color = 'var(--color-primary)';
+    } else {
+        labelEl.textContent = defaultText;
+        labelEl.style.borderColor = '#ddd';
+        labelEl.style.color = 'var(--color-muted)';
+    }
+}
+
+// Adiciona os listeners para o campo de upload (MODIFICADO)
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Listener para o campo de upload do Perfil (MODIFICADO)
+    const pfInput = document.getElementById('pfPhotoInput');
+    if(pfInput) {
+        pfInput.addEventListener('change', (e) => {
+            // Chama a função que salva o perfil
+            handleAvatarUpload(); 
+            // Chama a nova função para atualizar o label (Passo 2)
+            updateFileInputLabel('pfPhotoInput', 'pfPhotoLabel', '📷 Selecionar Foto de Perfil', e.target.files[0]);
         });
+    }
+
+    // 2. Listener para o campo de upload do Check-in (NOVO)
+    const photoInput = document.getElementById('photoInput');
+    if(photoInput) {
+        photoInput.addEventListener('change', (e) => {
+            // Chama a nova função para atualizar o label
+            updateFileInputLabel('photoInput', 'photoInputLabel', '📸 Escolher Foto da Aventura (Opcional)', e.target.files[0]);
+        });
+    }
+});
 
 
         // ------------------ CARIMBO DIGITAL (CANVAS) ------------------
@@ -951,51 +1017,66 @@
                 ctx.fillText(`📍 ${currentPark.city} | 📸 ${profile.name}`, 40, 1140); // Y = 1140 (Alterado 👣 para 📸)
 
 
-                // Badge do Avatar (Círculo)
-                const cx = canvas.width - 100, cy = 1110, r = 60;
-                ctx.beginPath();
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.arc(cx, cy, r, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.closePath();
 
-                // LÓGICA DE DESENHO ASSÍNCRONO DA FOTO DO PERFIL OU EMOJI
-                if (profile.avatarImage) {
-                    const profileImg = new Image();
-                    profileImg.crossOrigin = 'anonymous'; // CORREÇÃO CORS
+// LÓGICA DE DESENHO ASSÍNCRONO DA FOTO DO PERFIL OU AVATAR RANDÔMICO (NOVO BLOCO)
 
-                    profileImg.onload = () => {
-                        // Desenha a imagem cortada como um círculo (máscara)
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.arc(cx, cy, r - 2, 0, Math.PI * 2, true);
-                        ctx.clip();
+// 1. Definições do Selo/Avatar no Canvas
+// REMOVIDO: O bloco que desenhava o círculo branco de fundo foi removido para respeitar a transparência.
+const avatarSize = 120; // Diâmetro de 120px (Maior)
+const avatarX = canvas.width - 100; // Centro X (Posição)
+const avatarY = 1110; // Centro Y (Posição)
+const radius = avatarSize / 2;
 
-                        // Cálculo para centralizar a imagem
-                        const imgRatio = Math.max((r * 2) / profileImg.width, (r * 2) / profileImg.height);
-                        const imgW = profileImg.width * imgRatio;
-                        const imgH = profileImg.height * imgRatio;
-                        const imgX = cx - imgW / 2;
-                        const imgY = cy - imgH / 2;
-                        
-                        ctx.drawImage(profileImg, imgX, imgY, imgW, imgH);
-                        
-                        ctx.restore();
-                        
-                        // Finaliza (chama o download)
-                        finalizeStampGeneration();
-                    };
-                    profileImg.onerror = () => {
-                        // Em caso de falha no carregamento, desenha o emoji
-                        drawAvatarEmoji(cx, cy); // Passa cx e cy
-                        finalizeStampGeneration();
-                    }
-                    profileImg.src = profile.avatarImage;
-                } else {
-                    // Se não houver foto, desenha o emoji e finaliza
-                    drawAvatarEmoji(cx, cy); // Passa cx e cy
-                    finalizeStampGeneration();
-                }
+// 2. Decide a fonte da imagem (Foto de Perfil ou Avatar Aleatório)
+const avatarSource = profile.avatarImage 
+    ? { url: profile.avatarImage, isProfile: true }
+    : (() => {
+        // Seleciona um avatar aleatório
+        const randomIndex = Math.floor(Math.random() * THEMED_AVATARS.length);
+        return { url: THEMED_AVATARS[randomIndex].value, isProfile: false };
+    })(); 
+
+const imgAvatar = new Image();
+imgAvatar.crossOrigin = 'anonymous'; 
+
+imgAvatar.onload = () => {
+    ctx.save();
+    
+    // Área de Corte (Máscara de Círculo)
+    ctx.beginPath();
+    ctx.arc(avatarX, avatarY, radius, 0, Math.PI * 2, true); 
+    ctx.clip(); // Aplica a máscara de corte
+
+    // Cálculo de Desenho: Centraliza e preenche o círculo
+    const imgRatio = Math.max(avatarSize / imgAvatar.width, avatarSize / imgAvatar.height);
+    const imgW = imgAvatar.width * imgRatio;
+    const imgH = imgAvatar.height * imgRatio;
+    const imgX = avatarX - imgW / 2;
+    const imgY = avatarY - imgH / 2;
+    
+    ctx.drawImage(imgAvatar, imgX, imgY, imgW, imgH);
+
+    ctx.restore(); // Restaura o estado para remover a máscara
+
+    // Finaliza a geração do carimbo após o desenho assíncrono
+    finalizeStampGeneration();
+};
+imgAvatar.onerror = () => {
+    // Se a foto do perfil ou o avatar randômico falhar, usamos um fallback simples
+    console.error('Erro ao carregar avatar/foto. Usando fallback 📸.');
+    
+    // Desenha um fallback simples no local (como o emoji antigo, mas sem o círculo)
+    ctx.fillStyle = 'var(--color-primary)';
+    ctx.font = '700 40px "Lato"';
+    ctx.textAlign = 'center';
+    ctx.fillText('📸', avatarX, avatarY + 15);
+    
+    finalizeStampGeneration();
+}
+imgAvatar.src = avatarSource.url; // Inicia o carregamento da imagem
+
+// O restante da função 'generateStamp' é movido para dentro dos 'onload' ou 'onerror'.
+return; // Sai da função principal para esperar o carregamento da imagem.
 
             }; // Fim do img.onload
             
@@ -1013,16 +1094,7 @@
             }
         }
 
-        // Funções auxiliares movidas para fora da generateStamp
-        function drawAvatarEmoji(cx, cy) {
-            const profile = loadProfile();
-            
-            // Desenha o fallback (ícone '📸' na posição central do avatar)
-            ctx.fillStyle = 'var(--color-primary)';
-            ctx.font = '700 40px "Lato"';
-            ctx.textAlign = 'center';
-            ctx.fillText(profile.avatar || '📸', cx, cy + 15);
-        }
+
 
         function finalizeStampGeneration() {
             const profile = loadProfile();
@@ -1098,13 +1170,7 @@
         document.getElementById('mapFrame').src = 'https://www.google.com/maps/d/embed?mid=1wh7GxT4BGPTMWEfc1UI_R9yhgosw4dQ&ehbc=2E312F';
 
 
-        document.getElementById('useMyMapsBtn').addEventListener('click', () => {
-            const url = prompt('Cole aqui o link de incorporação (iframe) do seu Google My Maps:\n(Deve ser uma URL longa começando com https://www.google.com/maps/embed/...)');
-            if (url) {
-                document.getElementById('mapFrame').src = url;
-                alert('Novo mapa carregado!');
-            }
-        });
+
 
         // ------------------ INICIALIZAÇÃO ------------------
 
